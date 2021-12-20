@@ -1,11 +1,11 @@
 package com.zzz.verifycode;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Random;
 import java.util.UUID;
 
@@ -16,6 +16,37 @@ import java.util.UUID;
  */
 public class VerifyCode {
     private static String VerifyCodeImgName;
+
+    //读取验证码图片并输出验证码图片到前端页面，这个会自动创建一张验证码图片
+    public static void outputVerifyCodeImgToHtml(String imgPath, HttpServletResponse response) {
+        FileInputStream fis = null;
+        response.setContentType("image/jpeg");
+        try {
+            OutputStream out = response.getOutputStream();
+
+            //验证码文件所在地址
+            String path = imgPath;
+            VerifyCode.createVerifyCode(path); //创建验证码图片到指定地址
+            String pathAndName = path + "\\" + VerifyCode.getVerifyCodeImgName(); //验证码地址和验证码名字拼接
+
+            File file = new File(pathAndName);
+            fis = new FileInputStream(file);
+            byte[] b = new byte[fis.available()];
+            fis.read(b);
+            out.write(b);
+            out.flush();
+        } catch (Exception e) {
+            throw new RuntimeException(e + "输出图片到html页面异常");
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e + "输出图片到html页面异常_流关闭异常");
+                }
+            }
+        }
+    }
 
     //生成验证码图片，并返回验证码字符串
     public static String createVerifyCode(String ImgPath) {
@@ -71,7 +102,7 @@ public class VerifyCode {
     }
 
     //删除用完的验证码图片
-    public static void deleteVerifyCodeImg(String imgPath,String verifyCodeImgName) {
+    public static void deleteVerifyCodeImg(String imgPath, String verifyCodeImgName) {
         File imgFile = new File(imgPath + "/" + verifyCodeImgName);
         imgFile.delete();
     }
@@ -80,6 +111,7 @@ public class VerifyCode {
     public static String getVerifyCodeImgName() {
         return VerifyCodeImgName;
     }
+
     //保存生成验证码图片的文件名
     public static void setVerifyCodeImgName(String verifyCodeImgName) {
         VerifyCodeImgName = verifyCodeImgName;
