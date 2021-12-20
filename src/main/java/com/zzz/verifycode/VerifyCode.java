@@ -2,7 +2,6 @@ package com.zzz.verifycode;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -18,15 +17,16 @@ public class VerifyCode {
     private static String VerifyCodeImgName;
 
     //读取验证码图片并输出验证码图片到前端页面，这个会自动创建一张验证码图片
-    public static void outputVerifyCodeImgToHtml(String imgPath, HttpServletResponse response) {
+    public static String outputVerifyCodeImgToHtml(String imgPath, HttpServletResponse response) {
         FileInputStream fis = null;
         response.setContentType("image/jpeg");
+        String verifyCode;
         try {
             OutputStream out = response.getOutputStream();
 
             //验证码文件所在地址
             String path = imgPath;
-            VerifyCode.createVerifyCode(path); //创建验证码图片到指定地址
+            verifyCode = VerifyCode.createVerifyCode(path);//创建验证码图片到指定地址
             String pathAndName = path + "\\" + VerifyCode.getVerifyCodeImgName(); //验证码地址和验证码名字拼接
 
             File file = new File(pathAndName);
@@ -46,6 +46,7 @@ public class VerifyCode {
                 }
             }
         }
+        return verifyCode;
     }
 
     //生成验证码图片，并返回验证码字符串
